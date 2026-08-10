@@ -244,7 +244,7 @@ export function Chat() {
   }
 
   return (
-    <div className="mx-auto flex h-dvh max-w-md flex-col gap-2 p-2">
+    <div className="mx-auto flex h-dvh max-w-md flex-col gap-2 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:max-w-lg md:max-w-2xl md:p-4 md:pb-[calc(1rem+env(safe-area-inset-bottom))] lg:max-w-3xl xl:max-w-4xl">
       <nav className="relative flex h-12 shrink-0 flex-row items-center justify-center">
         <Button
           variant="default"
@@ -305,6 +305,7 @@ export function Chat() {
                   <Input
                     {...field}
                     id={field.name}
+                    className="text-base sm:text-xs"
                     placeholder="Message"
                     aria-disabled={field.disabled}
                     autoComplete="off"
