@@ -4,12 +4,19 @@ import {
   messageWithUserSchema,
 } from "@chat/contracts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconArrowNarrowRight, IconLogout2 } from "@tabler/icons-react";
+import {
+  IconArrowNarrowRight,
+  IconDeviceDesktop,
+  IconLogout2,
+  IconMoon,
+  IconSun,
+} from "@tabler/icons-react";
 import { useRouter } from "@typeroute/router";
 import type { PublicationContext } from "centrifuge";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +48,9 @@ export function Chat() {
   const { data: sessionData, isPending: isSessionPending } =
     authClient.useSession();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const nextTheme =
+    theme === "dark" ? "light" : theme === "light" ? "system" : "dark";
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
     defaultValues: {
@@ -249,11 +259,27 @@ export function Chat() {
         <Button
           variant="default"
           className="absolute top-1/2 left-2 size-10 -translate-y-1/2 hover:cursor-pointer"
+          aria-label="Sign out"
           onClick={onSignOut}
         >
           <IconLogout2 className="size-6" />
         </Button>
         <h2 className="font-bold text-2xl">CHAT</h2>
+        <Button
+          variant="outline"
+          className="absolute top-1/2 right-2 size-10 -translate-y-1/2 hover:cursor-pointer"
+          aria-label={`Switch theme (current: ${theme})`}
+          title={`Theme: ${theme}`}
+          onClick={() => setTheme(nextTheme)}
+        >
+          {theme === "dark" ? (
+            <IconMoon className="size-6" />
+          ) : theme === "light" ? (
+            <IconSun className="size-6" />
+          ) : (
+            <IconDeviceDesktop className="size-6" />
+          )}
+        </Button>
       </nav>
       {hasMore && (
         <Button
@@ -265,6 +291,16 @@ export function Chat() {
         </Button>
       )}
       <div className="flex min-h-0 flex-1 flex-col-reverse gap-2 overflow-y-auto">
+        {messages.length === 0 && isMessagesLoading && (
+          <div className="m-auto">
+            <Spinner className="size-8" />
+          </div>
+        )}
+        {messages.length === 0 && !isMessagesLoading && (
+          <p className="m-auto text-muted-foreground text-sm">
+            No messages yet — say hi.
+          </p>
+        )}
         {messages.map((message) => (
           <Card
             key={message.id}

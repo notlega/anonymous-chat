@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => {
     addToast: vi.fn(),
     useSession: vi.fn(),
     signOut: vi.fn(),
+    setTheme: vi.fn(),
     centrifuge: {
       connect: vi.fn(),
       disconnect: vi.fn(),
@@ -56,6 +57,9 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/components/ui/toast", () => ({ toast: { add: mocks.addToast } }));
 vi.mock("@/lib/auth-client", () => ({
   authClient: { useSession: mocks.useSession, signOut: mocks.signOut },
+}));
+vi.mock("@/components/theme-provider", () => ({
+  useTheme: () => ({ theme: "light", setTheme: mocks.setTheme }),
 }));
 vi.mock("@/lib/centrifuge", () => ({
   centrifuge: mocks.centrifuge,
@@ -236,5 +240,28 @@ describe("Chat", () => {
     await waitFor(() =>
       expect(mocks.navigate).toHaveBeenCalledWith({ to: "/sign-in" }),
     );
+  });
+
+  test("should cycle theme on toggle click", async () => {
+    const user = userEvent.setup();
+
+    render(<Chat />);
+    await screen.findByText("Hello there");
+
+    await user.click(screen.getByRole("button", { name: /switch theme/i }));
+
+    expect(mocks.setTheme).toHaveBeenCalledWith("system");
+  });
+
+  test("should show empty state when no messages", async () => {
+    mocks.getMessages.mockResolvedValue(
+      jsonResponse({ messages: [], hasMore: false }),
+    );
+
+    render(<Chat />);
+
+    expect(
+      await screen.findByText("No messages yet — say hi."),
+    ).toBeInTheDocument();
   });
 });
