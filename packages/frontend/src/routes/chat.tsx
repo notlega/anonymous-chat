@@ -264,7 +264,7 @@ export function Chat() {
         >
           <IconLogout2 className="size-6" />
         </Button>
-        <h2 className="font-bold text-2xl">CHAT</h2>
+        <h2 className="font-bold text-2xl tracking-wide">CHAT</h2>
         <Button
           variant="outline"
           className="absolute top-1/2 right-2 size-10 -translate-y-1/2 hover:cursor-pointer"
