@@ -269,17 +269,18 @@ export function Chat() {
           <Card
             key={message.id}
             className={cn(
-              "wrap-break-word w-5/6 gap-2 overflow-visible border border-white p-2 *:p-0",
+              "wrap-break-word w-5/6 overflow-visible [--card-spacing:8px]",
               message.user.id === sessionData?.user.id && "self-end",
             )}
           >
             <CardHeader>
               <CardTitle className="flex justify-between">
                 <span className="font-bold">{message.user.name}</span>
-                <span className="font-normal opacity-70">
-                  {message.createdAt
-                    .toLocaleTimeString()
-                    .replace(/:\d{2}$/, "")}
+                <span className="font-normal tabular-nums opacity-70">
+                  {message.createdAt.toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
                 </span>
               </CardTitle>
             </CardHeader>
