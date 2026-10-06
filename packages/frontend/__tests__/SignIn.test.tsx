@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { SignIn } from "@/routes/sign-in";
 
 const mocks = vi.hoisted(() => ({
@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   signInAnonymous: vi.fn(),
   navigate: vi.fn(),
   toastAdd: vi.fn(),
+  useSession: vi.fn(),
 }));
 
 vi.mock("@/components/ui/toast", () => ({
@@ -17,6 +18,7 @@ vi.mock("@/lib/auth-client", () => ({
   authClient: {
     getSession: mocks.getSession,
     signIn: { anonymous: mocks.signInAnonymous },
+    useSession: mocks.useSession,
   },
 }));
 vi.mock("@typeroute/router", () => ({
@@ -29,6 +31,21 @@ vi.mock("@typeroute/router", () => ({
 }));
 
 describe("SignIn", () => {
+  beforeEach(() => {
+    mocks.useSession.mockReturnValue({ data: null, isPending: false });
+  });
+
+  test("should redirect when session already exists on load", () => {
+    mocks.useSession.mockReturnValue({
+      data: { user: { id: "u1" }, session: { id: "s1" } },
+      isPending: false,
+    });
+
+    render(<SignIn />);
+
+    expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" });
+  });
+
   test("should show info toast and navigate when already signed in", async () => {
     mocks.getSession.mockResolvedValue({
       data: {
@@ -57,7 +74,7 @@ describe("SignIn", () => {
 
     render(<SignIn />);
 
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Enter chat" }));
     await waitFor(() => {
       expect(mocks.toastAdd).toHaveBeenCalledWith({
         type: "info",
@@ -100,7 +117,7 @@ describe("SignIn", () => {
     const user = userEvent.setup();
 
     render(<SignIn />);
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Enter chat" }));
     await waitFor(() => {
       expect(mocks.toastAdd).toHaveBeenCalledWith({
         type: "success",
@@ -120,7 +137,7 @@ describe("SignIn", () => {
 
     render(<SignIn />);
 
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Enter chat" }));
     await waitFor(() => {
       expect(mocks.toastAdd).toHaveBeenCalledWith({
         type: "error",

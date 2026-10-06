@@ -69,6 +69,9 @@ vi.mock("@typeroute/router", () => ({
   useRouter: () => ({
     navigate: mocks.navigate,
   }),
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
 }));
 
 const sampleMessages = [
@@ -145,9 +148,8 @@ describe("Chat", () => {
     render(<Chat />);
 
     expect(await screen.findByText("Hello there")).toBeInTheDocument();
-    expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Load older" }),
+      screen.queryByRole("button", { name: "Earlier messages" }),
     ).not.toBeInTheDocument();
   });
 
@@ -235,7 +237,7 @@ describe("Chat", () => {
 
     render(<Chat />);
 
-    await user.click(screen.getAllByRole("button")[0]);
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
 
     await waitFor(() =>
       expect(mocks.navigate).toHaveBeenCalledWith({ to: "/sign-in" }),
@@ -260,8 +262,52 @@ describe("Chat", () => {
 
     render(<Chat />);
 
-    expect(
-      await screen.findByText("No messages yet — say hi."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("No messages yet.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Say hi" })).toBeInTheDocument();
+  });
+
+  test("should prefill message from empty-state chip", async () => {
+    mocks.getMessages.mockResolvedValue(
+      jsonResponse({ messages: [], hasMore: false }),
+    );
+    const user = userEvent.setup();
+
+    render(<Chat />);
+
+    await user.click(await screen.findByRole("button", { name: "Say hi" }));
+
+    expect(screen.getByPlaceholderText("Message")).toHaveValue("Say hi");
+  });
+
+  test("should group consecutive messages from the same user", async () => {
+    mocks.getMessages.mockResolvedValue(
+      jsonResponse({
+        messages: [
+          {
+            id: "m2",
+            userId: "u2",
+            content: "Second from Bob",
+            createdAt: "2026-08-08T00:01:00.000Z",
+            updatedAt: "2026-08-08T00:01:00.000Z",
+            user: { id: "u2", name: "Bob" },
+          },
+          {
+            id: "m1",
+            userId: "u2",
+            content: "First from Bob",
+            createdAt: "2026-08-08T00:00:00.000Z",
+            updatedAt: "2026-08-08T00:00:00.000Z",
+            user: { id: "u2", name: "Bob" },
+          },
+        ],
+        hasMore: false,
+      }),
+    );
+
+    render(<Chat />);
+
+    expect(await screen.findByText("First from Bob")).toBeInTheDocument();
+    expect(screen.getByText("Second from Bob")).toBeInTheDocument();
+    expect(screen.getAllByText("Bob")).toHaveLength(1);
   });
 });

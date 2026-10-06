@@ -410,7 +410,7 @@ Repositories and Centrifugo are mocked via `vi.spyOn` where appropriate.
 
 ### Frontend
 
-The frontend suite contains 17 unit/component tests.
+The frontend suite contains 24 unit/component tests.
 
 Tests cover:
 
@@ -418,8 +418,11 @@ Tests cover:
 * Authentication guards
 * Chat rendering
 * Message submission
+* Message grouping
+* Empty-state prompt chips
 * Realtime message reception
 * Realtime publication handling
+* Legal pages (terms/privacy)
 
 External dependencies such as the authentication client, Centrifuge client, toast notifications, and `fetch` are mocked where appropriate.
 
