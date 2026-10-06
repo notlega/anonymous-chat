@@ -1,4 +1,4 @@
-# Chat
+# Anonymous Chat
 
 Realtime anonymous group chat built on a pnpm monorepo with React, Fastify, PostgreSQL, and self-hosted Centrifugo.
 
